@@ -14,6 +14,19 @@ function userInformationHTML(user) {
             <p>Followers: ${user.followers} - Following ${user.following} <br> Repos: ${user.public_repos}</p>
         </div>`;
 }
+
+function repoInformationHTML(repos) {
+    if (repos.lenght == 0) {
+        return `<div class="clearfix repo-list">No repos!</div>`;
+    }
+
+    var listItemsHTML = repos.map(function(repo) {
+        return `<li>
+                    <a herf="${repo.html_url}" target="_blank">${repo.name}</a>
+                </li>`;
+    })
+}
+
 function fetchGitHubInformation(event) {
 
     var username = $("#gh-username").val();
@@ -28,11 +41,14 @@ function fetchGitHubInformation(event) {
         </div>`);
 
     $.when(
-        $.getJSON(`https://api.github.com/users/${username}`)
+        $.getJSON(`https://api.github.com/users/${username}`),
+        $.getJSON(`https://api.github.com/users/${username}/repos`)
     ).then(
-        function(response) {
-            var userData = response;
+        function(firstResponse, secondResponse) {
+            var userData = firstResponse[0];
+            var repoData = secondResponse[0];
             $("#gh-user-data").html(userInformationHTML(userData));
+            $("#gh-repo-data").hmtl(repoInformationHTML (repoData));
         },
         function(errorResponse) {
             if (errorResponse.status === 404) {
